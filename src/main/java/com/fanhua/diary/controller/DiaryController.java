@@ -13,6 +13,7 @@ import java.util.List;
 
 @RequestMapping("/diary")
 @RestController
+@CrossOrigin
 public class DiaryController {
 
     @Autowired
@@ -78,3 +79,4 @@ public class DiaryController {
 
 
 }
+
