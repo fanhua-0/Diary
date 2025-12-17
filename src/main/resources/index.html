@@ -2,349 +2,327 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>我的云端日记本</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css" />
     <script src="https://unpkg.com/element-plus"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://unpkg.com/@element-plus/icons-vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
     <style>
-        /* 全局背景：搞点渐变色，不再死板 */
+        /* --- 1. 背景：保持你喜欢的透亮梦幻色 --- */
         body {
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            /* 浅紫 -> 浅蓝，通透感 */
+            background: linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%);
+            background-attachment: fixed;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            overflow-x: hidden;
+            color: #555;
         }
 
         .main-container {
-            max-width: 1200px;
+            max-width: 1200px; /* 保持宽屏 */
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 20px;
         }
 
-        /* 顶部导航栏 */
+        /* --- 2. 顶部导航 --- */
         .nav-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            padding: 20px 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px; /* 间距改小 */
+            padding: 10px 25px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 20px rgba(142, 197, 252, 0.2);
         }
 
         .app-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
+            font-size: 20px;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
-        /* 卡片容器布局 */
-        .card-grid {
+        /* --- 3. 布局：高密度网格 --- */
+        .cloud-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px;
+            /*
+               关键改动：minmax 改为 210px
+               这意味着屏幕够宽时，一行可以放 4-5 个云朵
+            */
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 25px; /* 间距改小，更紧凑 */
+            padding-bottom: 60px;
         }
 
-        /* 日记卡片样式 */
-        .diary-card {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            transition: all 0.3s ease;
+        /* --- 4. 迷你版手绘云朵 --- */
+        .cloud-card {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 200' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='rainbow' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' stop-color='%23ff9a9e'/%3E%3Cstop offset='20%25' stop-color='%23fad0c4'/%3E%3Cstop offset='40%25' stop-color='%23ffd1ff'/%3E%3Cstop offset='60%25' stop-color='%23a18cd1'/%3E%3Cstop offset='80%25' stop-color='%2384fab0'/%3E%3Cstop offset='100%25' stop-color='%238fd3f4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M30,100 Q20,80 40,60 Q30,30 60,20 Q80,0 110,10 Q140,-10 170,10 Q200,0 230,20 Q260,10 280,50 Q300,70 280,100 Q300,130 270,150 Q250,180 210,170 Q180,190 140,180 Q100,200 60,180 Q20,190 10,150 Q-10,120 30,100 Z' fill='%23fffdf5' stroke='url(%23rainbow)' stroke-width='5' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            background-position: center;
+            background-color: transparent;
+            box-shadow: none;
+            border: none;
+
+            /* 内边距缩小，适配小尺寸 */
+            padding: 30px 25px 30px 25px;
+
+            /* 最小高度改小 */
+            min-height: 140px;
+
+            cursor: pointer;
+            transition: transform 0.3s ease;
             position: relative;
-            border: 1px solid rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
-            height: 280px; /* 固定高度，整齐一点 */
+
+            filter: drop-shadow(0 5px 10px rgba(161, 140, 209, 0.2));
         }
 
-        .diary-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-            border-color: #a1c4fd;
+        .cloud-card:hover {
+            transform: translateY(-5px) scale(1.05); /* 鼠标放上去稍微放大一点点 */
+            filter: drop-shadow(0 10px 20px rgba(161, 140, 209, 0.3));
+            z-index: 10;
         }
 
-        .card-date {
-            font-size: 13px;
-            color: #909399;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        /* 内部文字样式：字号缩小 */
+        .cloud-date {
+            font-size: 11px; /* 缩小 */
+            color: #aaa;
+            margin-bottom: 4px;
+            text-align: center;
         }
 
-        .card-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #303133;
-            margin-bottom: 15px;
-            white-space: nowrap;
+        .cloud-title {
+            font-size: 16px; /* 缩小 */
+            font-weight: 800;
+            color: #444;
+            margin-bottom: 6px;
+            text-align: center;
             overflow: hidden;
+            white-space: nowrap;
             text-overflow: ellipsis;
         }
 
-        .card-content {
-            font-size: 14px;
-            color: #606266;
-            line-height: 1.6;
-            flex-grow: 1; /* 让内容占据剩余空间 */
-            overflow: hidden;
+        .cloud-content {
+            font-size: 13px; /* 缩小，能显示更多字 */
+            line-height: 1.5;
+            color: #666;
+            flex-grow: 1;
+            /* 限制显示 3 行，因为卡片变矮了 */
             display: -webkit-box;
-            -webkit-line-clamp: 5; /* 最多显示5行 */
+            -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
-            margin-bottom: 15px;
-        }
-
-        /* 底部操作区 */
-        .card-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            opacity: 0; /* 默认隐藏按钮 */
-            transition: opacity 0.3s;
-        }
-
-        .diary-card:hover .card-actions {
-            opacity: 1; /* 鼠标放上去才显示按钮 */
-        }
-
-        /* 加载动画修正 */
-        .loading-container {
+            overflow: hidden;
             text-align: center;
-            padding: 50px;
-            color: #909399;
+            font-family: 'Comic Sans MS', 'Pretendard', sans-serif;
+        }
+
+        /* 底部操作按钮 */
+        .cloud-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        /* 按钮稍微改小一点 */
+        .cloud-actions .el-button.is-circle {
+            width: 24px;
+            height: 24px;
+            padding: 5px;
+        }
+
+        .cloud-card:hover .cloud-actions {
+            opacity: 1;
+        }
+
+        /* --- 弹窗样式 --- */
+        .custom-dialog {
+            border-radius: 20px !important;
+            background: #fffdf5 !important;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1) !important;
+        }
+        .cloud-input .el-textarea__inner,
+        .cloud-input .el-input__wrapper {
+            background-color: #fff !important;
+            border: 2px dashed #d1d9e6;
+            border-radius: 20px;
+            padding: 15px;
+            box-shadow: none !important;
+        }
+        .cloud-input .el-textarea__inner:focus {
+            border-color: #a18cd1;
+            background-color: #f9f9ff !important;
+        }
+
+        /* 手机适配 */
+        @media (max-width: 768px) {
+            .cloud-grid {
+                /* 手机上一行放两个，稍微挤一点但能看更多 */
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            .cloud-card {
+                padding: 25px 15px;
+                min-height: 120px;
+            }
+            .nav-header { flex-direction: column; }
+            .cloud-content { -webkit-line-clamp: 2; } /* 手机上只显示2行 */
         }
     </style>
 </head>
 <body>
 <div id="app">
     <div class="main-container">
-        <!-- 顶部栏 -->
+        <!-- 头部 -->
         <div class="nav-header">
             <div class="app-title">
-                <span>📖</span>
-                <span>私密日记本</span>
+                <span style="font-size: 24px;">🌈</span>
+                <span>我的云端日记本</span>
             </div>
-            <el-button type="primary" size="large" round color="#626aef" @click="openAddDialog">
-                <el-icon class="el-icon--left"><Edit /></el-icon>
-                写一篇新的
+            <el-button color="#fff" round size="default" @click="openAddDialog" style="color: #8ec5fc; font-weight: 900; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <el-icon style="margin-right: 6px"><Edit /></el-icon> 记一笔
             </el-button>
         </div>
 
-        <!-- 加载中 -->
-        <div v-if="loading" class="loading-container">
-            拼命加载中...
+        <!-- 加载 -->
+        <div v-if="loading" style="text-align: center; padding: 60px; color: #fff;">
+            <el-icon class="is-loading" size="30"><Loading /></el-icon>
+            <div style="margin-top: 10px; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">正在捕捉云朵...</div>
         </div>
 
         <!-- 空状态 -->
-        <el-empty v-if="!loading && diaryList.length === 0" description="这里空空如也，快去写下第一篇日记吧！"></el-empty>
+        <el-empty v-if="!loading && diaryList.length === 0" description="这里好空，快放飞第一朵云吧！" :image-size="150"></el-empty>
 
-        <!-- 日记卡片列表 -->
-        <div class="card-grid" v-if="!loading && diaryList.length > 0">
-            <div class="diary-card" v-for="item in diaryList" :key="item.id" @click="showDetail(item)">
-                <div class="card-date">
-                    <el-icon><Calendar /></el-icon>
-                    {{ formatTime(item.createTime) }}
-                </div>
-                <div class="card-title">{{ item.title }}</div>
-                <div class="card-content">{{ item.content }}</div>
+        <!-- 云朵列表 -->
+        <div class="cloud-grid" v-if="!loading && diaryList.length > 0">
+            <div class="cloud-card" v-for="item in diaryList" :key="item.id" @click="showDetail(item)">
+                <div class="cloud-date">{{ formatTime(item.createTime) }}</div>
+                <div class="cloud-title">{{ item.title }}</div>
+                <div class="cloud-content">{{ item.content }}</div>
 
-                <div class="card-actions" @click.stop> <!-- stop防止点按钮时触发查看详情 -->
-                    <el-button type="primary" circle size="small" @click="openEditDialog(item)">
-                        <el-icon><Edit-Pen /></el-icon>
+                <div class="cloud-actions" @click.stop>
+                    <el-button type="primary" size="small" circle color="#a18cd1" @click="openEditDialog(item)">
+                        <el-icon size="12"><Edit-Pen /></el-icon>
                     </el-button>
-                    <el-button type="danger" circle size="small" @click="handleDelete(item.id)">
-                        <el-icon><Delete /></el-icon>
-                    </el-button>
+                    <el-popconfirm title="让这朵云消散吗？" @confirm="handleDelete(item.id)">
+                        <template #reference>
+                            <el-button type="danger" size="small" circle color="#ff9a9e">
+                                <el-icon size="12"><Delete /></el-icon>
+                            </el-button>
+                        </template>
+                    </el-popconfirm>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 编辑/新增 弹窗 (加大加宽版) -->
-    <el-dialog
-            v-model="dialogVisible"
-            :title="isEditMode ? '✏️ 编辑我的回忆' : '📝 写一篇新日记'"
-            width="75%"
-            top="5vh"
-            style="border-radius: 16px; max-width: 1000px;">
-
-        <el-form :model="form" label-position="top">
-            <el-form-item label="标题">
-                <el-input
-                        v-model="form.title"
-                        placeholder="给今天起个标题吧..."
-                        size="large"
-                        style="font-size: 18px; font-weight: bold;">
-                </el-input>
+    <!-- 弹窗 -->
+    <el-dialog v-model="dialogVisible" :title="isEditMode ? '修剪云朵' : '捏一朵新云彩'" width="85%" style="max-width: 500px;" class="custom-dialog">
+        <el-form :model="form">
+            <el-form-item>
+                <el-input v-model="form.title" placeholder="标题..." class="cloud-input" size="large" style="font-weight: bold; font-size: 16px;"></el-input>
             </el-form-item>
-
-            <el-form-item label="正文">
-                <el-input
-                        v-model="form.content"
-                        type="textarea"
-                        :rows="18"
-                        placeholder="在这里尽情书写..."
-                        resize="none"
-                        style="font-size: 16px; line-height: 1.6;">
-                </el-input>
+            <el-form-item>
+                <el-input v-model="form.content" type="textarea" :rows="8" placeholder="写下你的心情..." class="cloud-input" resize="none"></el-input>
             </el-form-item>
         </el-form>
-
         <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="dialogVisible = false" size="large" round>先不写了</el-button>
-                    <el-button type="primary" @click="submitDiary" size="large" round color="#626aef" style="padding: 0 40px;">
-                        保存日记
-                    </el-button>
-                </span>
+            <el-button @click="dialogVisible = false" round>算了</el-button>
+            <el-button color="#8ec5fc" @click="submitDiary" round style="color: white; font-weight: bold;">放飞</el-button>
         </template>
     </el-dialog>
 
-    <!-- 查看详情弹窗 -->
-    <el-dialog v-model="detailVisible" :title="currentDiary.title" width="600px" center>
-        <div style="text-align: center; color: #999; margin-bottom: 20px;">
+    <el-dialog v-model="detailVisible" :title="currentDiary.title" width="85%" style="max-width: 500px;" class="custom-dialog" align-center>
+        <div style="font-size: 12px; color: #bbb; text-align: center; margin-bottom: 20px;">
             {{ formatTime(currentDiary.createTime) }}
         </div>
-        <div style="font-size: 16px; line-height: 1.8; color: #333; white-space: pre-wrap; padding: 0 20px;">
-            {{ currentDiary.content }}
-        </div>
+        <div style="line-height: 1.8; color: #555; white-space: pre-wrap; padding: 0 10px; font-family: 'Comic Sans MS', sans-serif;">{{ currentDiary.content }}</div>
     </el-dialog>
 </div>
 
 <script>
     const { createApp, ref, reactive, onMounted } = Vue;
-    const { ElMessage, ElMessageBox } = ElementPlus;
-    const { Edit, Calendar, Delete, EditPen } = ElementPlusIconsVue;
+    const { ElMessage } = ElementPlus;
+    const { Edit, Loading, EditPen, Delete } = ElementPlusIconsVue;
 
     const app = createApp({
-        components: { Edit, Calendar, Delete, EditPen },
+        components: { Edit, Loading, EditPen, Delete },
         setup() {
-            // 后端地址
-            const API_BASE_URL = 'http://localhost:8080/diary';
-
+            const API_BASE_URL = '/diary';
             const diaryList = ref([]);
             const loading = ref(false);
             const dialogVisible = ref(false);
             const detailVisible = ref(false);
-            const isEditMode = ref(false); // 标记是“新增”还是“修改”
-
-            const form = reactive({
-                id: null,
-                title: '',
-                content: ''
-            });
-
+            const isEditMode = ref(false);
             const currentDiary = ref({});
+            const form = reactive({ id: null, title: '', content: '' });
 
-            // 1. 获取列表
             const getList = () => {
                 loading.value = true;
-                // 注意：这里用的是你定义的 /getAll 接口
                 axios.get(API_BASE_URL + '/getAll')
                     .then(res => {
-                        if(res.data.code === 200) {
-                            // 倒序排列，最新的在前面
-                            diaryList.value = res.data.data.reverse();
-                        } else {
-                            ElMessage.error('获取失败');
-                        }
+                        if(res.data.code === 200) diaryList.value = res.data.data.reverse();
                     })
                     .finally(() => loading.value = false);
             };
 
-            // 2. 打开新增窗口
             const openAddDialog = () => {
-                isEditMode.value = false;
-                form.id = null;
-                form.title = '';
-                form.content = '';
+                isEditMode.value = false; form.id = null; form.title = ''; form.content = '';
                 dialogVisible.value = true;
             };
 
-            // 3. 打开修改窗口 (关键功能)
             const openEditDialog = (item) => {
-                isEditMode.value = true;
-                // 回显数据
-                form.id = item.id;
-                form.title = item.title;
-                form.content = item.content;
+                isEditMode.value = true; Object.assign(form, item);
                 dialogVisible.value = true;
             };
 
-            // 4. 提交（根据模式判断是新增还是修改）
             const submitDiary = () => {
-                if(!form.title || !form.content) {
-                    ElMessage.warning('写点东西再保存吧~');
-                    return;
-                }
-
-                if (isEditMode.value) {
-                    // --- 修改逻辑 ---
-                    axios.post(API_BASE_URL + '/update', form)
-                        .then(res => {
-                            if(res.data.code === 200) {
-                                ElMessage.success('修改成功 ✨');
-                                dialogVisible.value = false;
-                                getList();
-                            } else {
-                                ElMessage.error(res.data.message);
-                            }
-                        });
-                } else {
-                    // --- 新增逻辑 ---
-                    axios.post(API_BASE_URL + '/add', form)
-                        .then(res => {
-                            if(res.data.code === 200) {
-                                ElMessage.success('发布成功 🎉');
-                                dialogVisible.value = false;
-                                getList();
-                            } else {
-                                ElMessage.error(res.data.message);
-                            }
-                        });
-                }
+                if(!form.title || !form.content) return ElMessage.warning('云彩不能为空哦');
+                const url = isEditMode.value ? '/update' : '/add';
+                axios.post(API_BASE_URL + url, form).then(res => {
+                    if(res.data.code === 200) {
+                        ElMessage.success('成功'); dialogVisible.value = false; getList();
+                    }
+                });
             };
 
-            // 5. 删除
             const handleDelete = (id) => {
-                ElMessageBox.confirm('真的要狠心删除这篇回忆吗？', '提示', {
-                    confirmButtonText: '删掉',
-                    cancelButtonText: '留着',
-                    type: 'warning'
-                }).then(() => {
-                    axios.post(API_BASE_URL + '/delete?id=' + id)
-                        .then(res => {
-                            if(res.data.code === 200) {
-                                ElMessage.success('已删除');
-                                getList();
-                            }
-                        });
-                }).catch(() => {});
+                axios.post(API_BASE_URL + '/delete?id=' + id).then(res => {
+                    if(res.data.code === 200) { ElMessage.success('已消散'); getList(); }
+                });
             };
 
             const showDetail = (item) => {
-                currentDiary.value = item;
-                detailVisible.value = true;
+                currentDiary.value = item; detailVisible.value = true;
             };
 
             const formatTime = (str) => {
                 if(!str) return '';
+                if(Array.isArray(str)) {
+                    const pad = n => n < 10 ? '0'+n : n;
+                    return `${str[0]}-${pad(str[1])}-${pad(str[2])} ${pad(str[3] || 0)}:${pad(str[4] || 0)}`;
+                }
                 return str.replace('T', ' ').substring(0, 16);
             };
 
-            onMounted(() => {
-                getList();
-            });
+            onMounted(() => getList());
 
             return {
                 diaryList, loading, dialogVisible, detailVisible,
