@@ -1,0 +1,31 @@
+package com.fanhua.diary.common;
+
+import lombok.Data;
+
+@Data
+public class Result<T> {
+    private Integer code;
+    private String message;
+    private T data;
+
+    public static <T> Result<T> success(T data) {
+        Result<T> result = new Result<>();
+        result.setCode(200); // 约定 200 为成功
+        result.setMessage("操作成功");
+        result.setData(data);
+        return result;
+    }
+
+    public static <T> Result<T> success() {
+        return success(null);
+    }
+
+    public static<T> Result<T> error(String message){
+        Result<T> result = new Result<>();
+        result.setCode(500); // 约定 500 为失败
+        result.setMessage(message);
+        result.setData(null); // 失败时 data 为 null
+        return result;
+    }
+
+}
