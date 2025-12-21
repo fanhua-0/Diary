@@ -3,6 +3,7 @@ package com.fanhua.diary.controller;
 
 import com.fanhua.diary.model.Diary;
 import com.fanhua.diary.service.DiaryService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.fanhua.diary.common.Result;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 
+@Slf4j
 @RequestMapping("/diary")
 @RestController
 @CrossOrigin
@@ -26,6 +28,7 @@ public class DiaryController {
         diary.setCreateTime(now);
         diary.setUpdateTime(now);
         diaryService.addDiary(diary);
+        log.info("添加成功");
         return Result.success(diary);
     }
 
@@ -79,4 +82,3 @@ public class DiaryController {
 
 
 }
-
